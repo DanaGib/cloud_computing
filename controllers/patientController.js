@@ -58,7 +58,8 @@ export const createNewPatient = async (req, res) => {
 
     // Check if an image was uploaded
     if (req.file) {
-        const imgPath = path.join(__dirname, req.file.path);
+        // const imgPath = path.join(__dirname, req.file.path);
+        const imgPath = path.join(__dirname, '../uploads', req.file.filename);
         const formData = new FormData();
         formData.append('image', fs.createReadStream(imgPath));
 

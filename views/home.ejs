@@ -3,13 +3,52 @@
     <%- include('./partials/head.ejs') %>
 <body>
     <%- include('./partials/nav.ejs') %>
-    <div class="conatianer-fluid m-4">
-        <h1>Patients Management</h1>
-        <h3>Manage Your Patiens Data</h3>
-        <div>
-            This is a basic web application that manages patients store
+    
+    <!-- Enhanced content container -->
+    <div class="container-fluid p-5 my-5 bg-light text-dark rounded shadow-lg">
+        <h1 class="display-4 text-center mb-4">Patients Management</h1>
+        <h3 class="text-center mb-3">Manage Your Patients Data</h3>
+        <div class="lead text-center">
+            This is a basic web application that manages patients store.
         </div>
     </div>  
+    
     <%- include('./partials/footer.ejs') %>  
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .container-fluid {
+            max-width: 800px;
+            margin: 0 auto; /* Center the container */
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #343a40; /* Darker color for contrast */
+        }
+
+        h3 {
+            font-size: 1.75rem;
+            color: #6c757d; /* Muted color for a softer look */
+        }
+
+        .lead {
+            font-size: 1.25rem;
+            font-weight: 300;
+        }
+
+        .bg-light {
+            background-color: #ffffff !important;
+        }
+
+        .shadow-lg {
+            box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+        }
+    </style>
 </body>
 </html>

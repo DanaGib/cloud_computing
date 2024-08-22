@@ -14,13 +14,16 @@ const __dirname = dirname(__filename);
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
-
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
 
 app.use('/uploads', express.static('uploads'));
 
-const uploadsDir = './uploads';
+// const uploadsDir = './uploads';
+// if (!fs.existsSync(uploadsDir)) {
+//     fs.mkdirSync(uploadsDir);
+// }
+const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir);
 }

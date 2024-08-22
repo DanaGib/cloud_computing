@@ -128,8 +128,18 @@
 
     <script src="/js/gender-toggle.js"></script>
     <script src="/js/preview-image.js"></script>
-    
+    <script type="module">
+        import { calculateAge } from '/js/calculateAge.js';
 
+        document.getElementById('dob').addEventListener('change', function() {
+            const dob = this.value;
+            if (dob) {
+                document.getElementById('age').value = calculateAge(dob);
+            } else {
+                document.getElementById('age').value = '';
+            }
+        });
+    </script>
     <!-- Datepicker Initialization -->
     <script>
         $(document).ready(function() {
@@ -146,5 +156,6 @@
        });
    });
     </script>
+    
 </body>
 </html>
