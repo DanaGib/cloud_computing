@@ -1,7 +1,7 @@
 import { getAllPatients, getPatientById, createPatient, updatePatient, deletePatient } from '../models/patientModel.js';
 import { getAllMedications } from '../models/medicationModel.js';
-import { calculateAge } from '../public/js/calculateAge.js';
-import { formatDate } from '../util.js';
+import { calculateAge} from '../public/js/calculateAge.js';
+import { formatDate,sendWhatsAppMessage } from '../util.js';
 import path from 'path';
 import FormData from 'form-data';
 import got from 'got';
@@ -113,9 +113,11 @@ export const createNewPatient = async (req, res) => {
             }
         });
 
-        if (conflicts.length > 0) {
+        if (conflicts.length > 0) {  
+            const messageBody = `The patient ${newPatient.lastName} ${newPatient.firstName} has the following conflicts:\n${conflicts.join('\n')}`           
+            await sendWhatsAppMessage(messageBody) 
             return res.render('create', {
-                errorMessage: conflicts.join('<br>'),
+                errorMessage: conflicts.join(' <br> '),
                 conditions: newConditions,
                 medications,
                 patient: newPatient,
@@ -164,6 +166,7 @@ export const editPatient = async (req, res) => {
     const patientId = req.params.id;
     const updatedMedications = req.body.medications || [];
     const updatedConditions = req.body.chronicalCondition || [];
+    const patient = await getPatientById(patientId);
 
     const updateData = {
         firstName: req.body.firstName,
@@ -206,7 +209,8 @@ export const editPatient = async (req, res) => {
             });
 
             if (conflicts.length > 0) {
-                const patient = await getPatientById(patientId);
+                const messageBody = `The patient ${patient.lastName} ${patient.firstName} has the following conflicts:\n${conflicts.join('\n')}`           
+                await sendWhatsAppMessage(messageBody) 
                 return res.render('edit', {
                     patient: { ...patient, ...updateData },
                     medications,
