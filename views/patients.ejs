@@ -33,7 +33,17 @@
             <tbody>
                 <% patients.forEach(function(patient) { %>
                 <tr>
-                    <td><img width="50" src="<%= patient.image %>" /></td>
+                    <td>
+                        <% if (patient.image) { %>
+                            <img id="imagePreview" 
+                                 src="<%= patient.image %>" 
+                                 alt="Image Preview" 
+                                 style="width: 70px; height:70px; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1); display: block; "/>
+                                 <% } else { %>
+                            <div class="image-placeholder" id="imagePlaceholder">
+                                <i class="fa-solid fa-user"></i>
+                            </div>
+                        <% } %></td>
                     <td><%= patient.firstName %></td>
                     <td><%= patient.lastName %></td>
                     <td><%= patient.phone %></td>

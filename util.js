@@ -48,3 +48,27 @@ export const sendWhatsAppMessage =  async (body) => {
     }
 }
 
+
+export const checkMedicationConflicts = (medications, updatedMedications, updatedConditions, conflicts) =>{
+    const checkedInteractions = new Set();
+
+    updatedMedications.forEach(medicationName => {
+        const medication = medications.find(med => med.drugName === medicationName);
+        if (medication) {
+            medication.relatedConditions.forEach(condition => {
+                if (updatedConditions.includes(condition)) {
+                    conflicts.push(`Medication ${medicationName} conflicts with your condition: ${condition}`);
+                }
+            });
+
+            medication.interactions.forEach(interaction => {
+                const interactionPair = [medicationName, interaction.withDrug].sort().join('|');
+
+                if (!checkedInteractions.has(interactionPair) && updatedMedications.includes(interaction.withDrug)) {
+                    conflicts.push(`Medication ${medicationName} interacts with ${interaction.withDrug}: ${interaction.interactionDescription}`);
+                    checkedInteractions.add(interactionPair);
+                }
+            });
+        }
+    });
+}

@@ -19,10 +19,6 @@ app.use(express.static('public'));
 
 app.use('/uploads', express.static('uploads'));
 
-// const uploadsDir = './uploads';
-// if (!fs.existsSync(uploadsDir)) {
-//     fs.mkdirSync(uploadsDir);
-// }
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir);
