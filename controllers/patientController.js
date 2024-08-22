@@ -1,7 +1,7 @@
 import { getAllPatients, getPatientById, createPatient, updatePatient, deletePatient } from '../models/patientModel.js';
 import { getAllMedications } from '../models/medicationModel.js';
-import { calculateAge } from '../public/js/calculateAge.js';
-import { formatDate } from '../util.js';
+import { calculateAge} from '../public/js/calculateAge.js';
+import { formatDate, sendWhatsAppMessage, checkMedicationConflicts } from '../util.js';
 import path from 'path';
 import FormData from 'form-data';
 import got from 'got';
@@ -60,6 +60,8 @@ export const createNewPatient = async (req, res) => {
     if (req.file) {
         // const imgPath = path.join(__dirname, req.file.path);
         const imgPath = path.join(__dirname, '../uploads', req.file.filename);
+        const imgData = fs.readFileSync(imgPath);
+        const contentType = req.file.mimetype;
         const formData = new FormData();
         formData.append('image', fs.createReadStream(imgPath));
 
@@ -75,7 +77,9 @@ export const createNewPatient = async (req, res) => {
             const faces = result.result.faces;
 
             if (faces && faces.length > 0) {
-                newPatient.image = `/uploads/${req.file.filename}`;
+                const base64Image = imgData.toString('base64');
+                const imageSrc = `data:${contentType};base64,${base64Image}`;
+                newPatient.image = imageSrc
             } else {
                 fs.unlinkSync(imgPath);
                 return res.render('create', { 
@@ -95,27 +99,12 @@ export const createNewPatient = async (req, res) => {
         const medications = await getAllMedications();
 
         let conflicts = [];
-
-        newMedications.forEach(medicationName => {
-            const medication = medications.find(med => med.drugName === medicationName);
-            if (medication) {
-                medication.relatedConditions.forEach(condition => {
-                    if (newConditions.includes(condition)) {
-                        conflicts.push(`Medication ${medicationName} conflicts with your condition: ${condition}`);
-                    }
-                });
-
-                medication.interactions.forEach(interaction => {
-                    if (newMedications.includes(interaction.withDrug)) {
-                        conflicts.push(`Medication ${medicationName} interacts with ${interaction.withDrug}: ${interaction.interactionDescription}`);
-                    }
-                });
-            }
-        });
-
-        if (conflicts.length > 0) {
+        checkMedicationConflicts(medications, newMedications, newConditions, conflicts);
+        if (conflicts.length > 0) {  
+            const messageBody = `The patient ${newPatient.lastName} ${newPatient.firstName} has the following conflicts:\n${conflicts.join('\n')}`           
+            await sendWhatsAppMessage(messageBody) 
             return res.render('create', {
-                errorMessage: conflicts.join('<br>'),
+                errorMessage: conflicts.join(' <br> '),
                 conditions: newConditions,
                 medications,
                 patient: newPatient,
@@ -164,6 +153,7 @@ export const editPatient = async (req, res) => {
     const patientId = req.params.id;
     const updatedMedications = req.body.medications || [];
     const updatedConditions = req.body.chronicalCondition || [];
+    const patient = await getPatientById(patientId);
 
     const updateData = {
         firstName: req.body.firstName,
@@ -179,34 +169,22 @@ export const editPatient = async (req, res) => {
     };
 
     if (req.file) {
-        updateData.image = `/uploads/${req.file.filename}`;
+        const imgPath = path.join(__dirname, '../uploads', req.file.filename);
+        const imgData = fs.readFileSync(imgPath);
+        const contentType = req.file.mimetype;
+        const base64Image = imgData.toString('base64');
+        const imageSrc = `data:${contentType};base64,${base64Image}`;
+        updateData.image= imageSrc
     }
 
     if (ObjectId.isValid(patientId)) {
         try {
             const medications = await getAllMedications();
-
             let conflicts = [];
-
-            updatedMedications.forEach(medicationName => {
-                const medication = medications.find(med => med.drugName === medicationName);
-                if (medication) {
-                    medication.relatedConditions.forEach(condition => {
-                        if (updatedConditions.includes(condition)) {
-                            conflicts.push(`Medication ${medicationName} conflicts with your condition: ${condition}`);
-                        }
-                    });
-
-                    medication.interactions.forEach(interaction => {
-                        if (updatedMedications.includes(interaction.withDrug)) {
-                            conflicts.push(`Medication ${medicationName} interacts with ${interaction.withDrug}: ${interaction.interactionDescription}`);
-                        }
-                    });
-                }
-            });
-
+            checkMedicationConflicts(medications, updatedMedications, updatedConditions, conflicts);
             if (conflicts.length > 0) {
-                const patient = await getPatientById(patientId);
+                const messageBody = `The patient ${patient.lastName} ${patient.firstName} has the following conflicts:\n${conflicts.join('\n')}`           
+                await sendWhatsAppMessage(messageBody) 
                 return res.render('edit', {
                     patient: { ...patient, ...updateData },
                     medications,
