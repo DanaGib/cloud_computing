@@ -184,7 +184,7 @@ export const editPatient = async (req, res) => {
             checkMedicationConflicts(medications, updatedMedications, updatedConditions, conflicts);
             if (conflicts.length > 0) {
                 const messageBody = `The patient ${patient.lastName} ${patient.firstName} has the following conflicts:\n${conflicts.join('\n')}`           
-                // await sendWhatsAppMessage(messageBody) 
+                await sendWhatsAppMessage(messageBody) 
                 return res.render('edit', {
                     patient: { ...patient, ...updateData },
                     medications,
