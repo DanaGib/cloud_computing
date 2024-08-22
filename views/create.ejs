@@ -22,7 +22,7 @@
                             <label for="image">Upload Image (Optional)</label>
                             <input type="file" class="form-control-file" id="image" name="image" onchange="previewImage(event)">
                             <% if (typeof errorMessage !== 'undefined') { %>
-                                <div id="error-message" class="text-danger" style="margin-top: 10px;"><%= errorMessage %></div>
+                                <div id="error-message" class="text-danger" style="margin-top: 10px;"><%- errorMessage %></div>
                             <% } else { %>
                                 <div id="error-message" class="text-danger" style="display: none; margin-top: 10px;"></div>
                             <% } %>                        
